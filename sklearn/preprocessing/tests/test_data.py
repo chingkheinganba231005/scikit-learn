@@ -2990,3 +2990,25 @@ def test_standard_scaler_callback_support(fit_method):
     task_end_record = [rec for rec in cb.record if rec["name"] == "on_fit_task_end"][0]
     fitted_scaler = task_end_record["kwargs"]["fitted_estimator"]
     assert_allclose(fitted_scaler.transform(X), Xt)
+
+
+@pytest.mark.parametrize("scaler_cls", [MinMaxScaler, MaxAbsScaler])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_partial_fit_all_nan_feature_batches(scaler_cls, reverse):
+    """An all-NaN batch must not corrupt accumulated statistics."""
+    X1 = np.array([[1.0, 2.0], [3.0, 4.0]])
+    X2 = np.array([[np.nan, 5.0], [np.nan, 6.0]])
+
+    if reverse:
+        X1 = np.array([[np.nan, 2.0], [np.nan, 4.0]])
+        X2 = np.array([[1.0, 5.0], [3.0, 6.0]])
+
+    scaler = scaler_cls()
+    scaler.partial_fit(X1)
+    scaler.partial_fit(X2)
+
+    if scaler_cls is MinMaxScaler:
+        np.testing.assert_allclose(scaler.data_min_, [1.0, 2.0])
+        np.testing.assert_allclose(scaler.data_max_, [3.0, 6.0])
+    else:
+        np.testing.assert_allclose(scaler.max_abs_, [3.0, 6.0])
