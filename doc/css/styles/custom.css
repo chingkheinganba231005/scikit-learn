@@ -79,6 +79,20 @@ code.literal {
     padding: 1%;
   }
 
+  /* Make it noticeable that images linking to an example are clickable: highlight
+     them on hover and, for figures, add a hint below the image that is also visible
+     on touch devices */
+  a[href^="../auto_examples/"]:is(:hover, :focus-visible) > img {
+    border-radius: 0.3rem;
+    box-shadow: 0 0 0 0.15rem var(--pst-color-link-hover);
+  }
+
+  figure > a[href^="../auto_examples/"]::after {
+    content: "Click to see the code that generated this plot";
+    display: block;
+    font-size: 0.8rem;
+  }
+
   /* Resize table of contents to make the top few levels of headings more visible */
   li.toctree-l1 {
     padding-bottom: 0.5em;
